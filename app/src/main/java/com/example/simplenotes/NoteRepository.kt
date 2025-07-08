@@ -1,19 +1,15 @@
 package com.example.simplenotes
 
-import androidx.lifecycle.LiveData
+import kotlinx.coroutines.flow.Flow
 
 class NoteRepository(private val noteDao: NoteDao) {
-    val allNotes: LiveData<List<Note>> = noteDao.getAllNotes()
+    fun getAllNotes(): Flow<List<Note>> = noteDao.getAllNotes()
 
-    suspend fun insert(note: Note) {
-        noteDao.insert(note)
-    }
+    suspend fun getNoteById(id: Int): Note? = noteDao.getNoteById(id)
 
-    suspend fun update(note: Note) {
-        noteDao.update(note)
-    }
+    suspend fun insertNote(note: Note) = noteDao.insertNote(note)
 
-    suspend fun delete(note: Note) {
-        noteDao.delete(note)
-    }
-} 
+    suspend fun updateNote(note: Note) = noteDao.updateNote(note)
+
+    suspend fun deleteNote(note: Note) = noteDao.deleteNote(note)
+}
