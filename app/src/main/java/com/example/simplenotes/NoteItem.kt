@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -33,30 +34,37 @@ fun NoteItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = NoteColors.backgroundColorMap[note.color] ?: NoteColors.GreenBg
+        )
     ) {
         Row(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(16.dp)
                     .background(
                         color = NoteColors.colorMap[note.color] ?: NoteColors.Green,
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(8.dp)
                     )
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = note.title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF2E2E2E)
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -64,7 +72,7 @@ fun NoteItem(
                 Text(
                     text = note.message,
                     fontSize = 14.sp,
-                    color = Color.Gray,
+                    color = Color(0xFF757575),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )

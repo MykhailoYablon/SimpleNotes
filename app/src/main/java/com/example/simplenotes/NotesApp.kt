@@ -3,6 +3,7 @@ package com.example.simplenotes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,10 +37,13 @@ fun NotesApp(viewModel: NotesViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Simple Notes",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp,
-                    textAlign = TextAlign.Justify) },
+                title = {
+                    Text(
+                        text = "Simple Notes",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
@@ -47,7 +52,8 @@ fun NotesApp(viewModel: NotesViewModel) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.showAddDialog() }
+                onClick = { viewModel.showAddDialog() },
+                containerColor = Color(0xFF6200EE)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Note")
             }
