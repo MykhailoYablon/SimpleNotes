@@ -1,30 +1,64 @@
 package com.example.simplenotes
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class NoteViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: NoteRepository
-    val allNotes: LiveData<List<Note>>
+class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
 
-    init {
-        val noteDao = NoteDatabase.getDatabase(application).noteDao()
-        repository = NoteRepository(noteDao)
-        allNotes = repository.allNotes
+    val notes = repository.getAllNotes()
+
+    private val _selectedNote = MutableStateFlow<Note?>(null)
+    val selectedNote: StateFlow<Note?> = _selectedNote.asStateFlow()
+
+    private val _showAddDialog = MutableStateFlow(false)
+    val showAddDialog: StateFlow<Boolean> = _showAddDialog.asStateFlow()
+
+    private val _showDetailDialog = MutableStateFlow(false)
+    val showDetailDialog: StateFlow<Boolean> = _showDetailDialog.asStateFlow()
+
+    fun showAddDialog() {
+        _showAddDialog.value = true
     }
 
-    fun insert(note: Note) = viewModelScope.launch {
-        repository.insert(note)
+    fun hideAddDialog() {
+        _showAddDialog.value = false
     }
 
-    fun update(note: Note) = viewModelScope.launch {
-        repository.update(note)
+    fun showDetailDialog(note: Note) {
+        _selectedNote.value = note
+        _showDetailDialog.value = true
     }
 
-    fun delete(note: Note) = viewModelScope.launch {
-        repository.delete(note)
+    fun hideDetailDialog() {
+        _showDetailDialog.value = false
+        _selectedNote.value = null
     }
-} 
+
+    fun addNote(title: String, message: String, color: String) {
+        viewModelScope.launch {
+            repository.insertNote(
+                Note(
+                    title = title,
+                    message = message,
+                    color = color
+                )
+            )
+        }
+    }
+
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            repository.updateNote(note)
+        }
+    }
+
+    fun deleteNote(note: Note) {
+        viewModelScope.launch {
+            repository.deleteNote(note)
+        }
+    }
+}
