@@ -41,10 +41,10 @@ fun NoteItem(
         ) {
             Box(
                 modifier = Modifier
-                    .size(12.dp)
+                    .size(20.dp)
                     .background(
                         color = NoteColors.colorMap[note.color] ?: NoteColors.Green,
-                        shape = RoundedCornerShape(6.dp)
+                        shape = RoundedCornerShape(10.dp)
                     )
             )
 
