@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,9 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.simplenotes.color.HighlightableTextField
 import com.example.simplenotes.ui.theme.NoteColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,8 +47,14 @@ fun NoteDetailDialog(
     var message by remember { mutableStateOf(note.message) }
     var selectedColor by remember { mutableStateOf(note.color) }
 
+    // Extract highlights from note object (assuming these properties exist in your Note class)
+    var currentMessageHighlights by remember(note) {
+        mutableStateOf(note.messageHighlights ?: emptyList())
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = NoteColors.backgroundColorMap[note.color] ?: NoteColors.GreenBg,
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -79,10 +90,12 @@ fun NoteDetailDialog(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
+                    HighlightableTextField(
                         value = message,
-                        onValueChange = { if (it.length <= 2560) message = it },
-                        label = { Text("Message (${message.length} length)") },
+                        onValueChange = { message = it },
+                        highlights = currentMessageHighlights,
+                        onHighlightsChange = { currentMessageHighlights = it },
+                        label = { Text("Message (${message.length} characters)") },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3,
                         maxLines = 5
@@ -132,7 +145,22 @@ fun NoteDetailDialog(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = note.message,
+                        text = buildAnnotatedString {
+                            append(message)
+                            currentMessageHighlights.forEach { highlight ->
+                                val start = highlight.start.coerceAtMost(message.length)
+                                val end = highlight.end.coerceAtMost(message.length)
+                                if (start < end) {
+                                    addStyle(
+                                        style = SpanStyle(
+                                            background = highlight.color.color.copy(alpha = 0.3f)
+                                        ),
+                                        start = start,
+                                        end = end
+                                    )
+                                }
+                            }
+                        },
                         fontSize = 16.sp
                     )
                 }
@@ -147,7 +175,8 @@ fun NoteDetailDialog(
                                 note.copy(
                                     title = title,
                                     message = message,
-                                    color = selectedColor
+                                    color = selectedColor,
+                                    messageHighlights = currentMessageHighlights
                                 )
                             )
                         }

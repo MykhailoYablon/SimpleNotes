@@ -19,17 +19,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.simplenotes.color.HighlightRange
+import com.example.simplenotes.color.HighlightableTextField
 import com.example.simplenotes.ui.theme.NoteColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteDialog(
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String, String, String, List<HighlightRange>) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("Green") }
+    var messageHighlights by remember { mutableStateOf<List<HighlightRange>>(emptyList()) }
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -43,12 +47,14 @@ fun AddNoteDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
+                HighlightableTextField(
                     value = message,
-                    onValueChange = { if (it.length <= 2560) message = it },
-                    label = { Text("Message (${message.length} length)") },
+                    onValueChange = { message = it },
+                    highlights = messageHighlights,
+                    onHighlightsChange = { messageHighlights = it },
+                    label = { Text("Message (${message.length} characters)") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5
@@ -77,7 +83,7 @@ fun AddNoteDialog(
             TextButton(
                 onClick = {
                     if (title.isNotBlank()) {
-                        onSave(title, message, selectedColor)
+                        onSave(title, message, selectedColor, messageHighlights)
                     }
                 },
                 enabled = title.isNotBlank()

@@ -2,6 +2,7 @@ package com.example.simplenotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplenotes.color.HighlightRange
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,13 +39,14 @@ class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
         _selectedNote.value = null
     }
 
-    fun addNote(title: String, message: String, color: String) {
+    fun addNote(title: String, message: String, color: String, highlights: List<HighlightRange>) {
         viewModelScope.launch {
             repository.insertNote(
                 Note(
                     title = title,
                     message = message,
-                    color = color
+                    color = color,
+                    messageHighlights = highlights
                 )
             )
         }

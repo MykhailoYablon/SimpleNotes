@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -70,7 +72,24 @@ fun NoteItem(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = note.message,
+                    text = buildAnnotatedString {
+                        var message = note.message
+                        var messageHighlights = note.messageHighlights ?: emptyList()
+                        append(message)
+                        messageHighlights.forEach { highlight ->
+                            val start = highlight.start.coerceAtMost(message.length)
+                            val end = highlight.end.coerceAtMost(message.length)
+                            if (start < end) {
+                                addStyle(
+                                    style = SpanStyle(
+                                        background = highlight.color.color.copy(alpha = 0.3f)
+                                    ),
+                                    start = start,
+                                    end = end
+                                )
+                            }
+                        }
+                    },
                     fontSize = 14.sp,
                     color = Color(0xFF757575),
                     maxLines = 2,
