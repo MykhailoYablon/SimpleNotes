@@ -47,8 +47,8 @@ fun AddNoteDialog(
 
                 OutlinedTextField(
                     value = message,
-                    onValueChange = { if (it.length <= 256) message = it },
-                    label = { Text("Message (${message.length}/256)") },
+                    onValueChange = { if (it.length <= 2560) message = it },
+                    label = { Text("Message (${message.length} length)") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     maxLines = 5
