@@ -1,4 +1,4 @@
-package com.example.simplenotes.color
+package com.example.simplenotes.highlight
 
 import androidx.compose.ui.graphics.Color
 

@@ -1,4 +1,4 @@
-package com.example.simplenotes
+package com.example.simplenotes.notes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,9 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.simplenotes.color.HighlightRange
-import com.example.simplenotes.color.HighlightableTextField
-import com.example.simplenotes.ui.theme.NoteColors
+import com.example.simplenotes.color.ColorSelector
+import com.example.simplenotes.highlight.HighlightRange
+import com.example.simplenotes.highlight.HighlightableTextField
+import com.example.simplenotes.color.NoteColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,24 +60,6 @@ fun AddNoteDialog(
                     minLines = 3,
                     maxLines = 5
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text("Color:", fontWeight = FontWeight.Bold)
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    NoteColors.colorList.forEach { color ->
-                        ColorSelector(
-                            color = color,
-                            isSelected = selectedColor == color,
-                            onSelect = { selectedColor = color }
-                        )
-                    }
-                }
             }
         },
         confirmButton = {

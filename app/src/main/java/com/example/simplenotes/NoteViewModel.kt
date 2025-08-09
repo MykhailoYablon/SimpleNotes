@@ -2,7 +2,8 @@ package com.example.simplenotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.simplenotes.color.HighlightRange
+import com.example.simplenotes.dao.NoteRepository
+import com.example.simplenotes.highlight.HighlightRange
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,16 +11,16 @@ import kotlinx.coroutines.launch
 
 class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
 
+    private val _showDetailScreen = MutableStateFlow(false)
+    val showDetailScreen = _showDetailScreen.asStateFlow()
+
     val notes = repository.getAllNotes()
 
     private val _selectedNote = MutableStateFlow<Note?>(null)
-    val selectedNote: StateFlow<Note?> = _selectedNote.asStateFlow()
+    val selectedNote = _selectedNote.asStateFlow()
 
     private val _showAddDialog = MutableStateFlow(false)
     val showAddDialog: StateFlow<Boolean> = _showAddDialog.asStateFlow()
-
-    private val _showDetailDialog = MutableStateFlow(false)
-    val showDetailDialog: StateFlow<Boolean> = _showDetailDialog.asStateFlow()
 
     fun showAddDialog() {
         _showAddDialog.value = true
@@ -31,11 +32,11 @@ class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
 
     fun showDetailDialog(note: Note) {
         _selectedNote.value = note
-        _showDetailDialog.value = true
+        _showDetailScreen.value = true
     }
 
-    fun hideDetailDialog() {
-        _showDetailDialog.value = false
+    fun hideDetailScreen() {
+        _showDetailScreen.value = false
         _selectedNote.value = null
     }
 

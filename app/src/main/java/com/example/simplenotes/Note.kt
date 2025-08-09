@@ -2,7 +2,7 @@ package com.example.simplenotes
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.simplenotes.color.HighlightRange
+import com.example.simplenotes.highlight.HighlightRange
 
 @Entity(tableName = "notes")
 data class Note(

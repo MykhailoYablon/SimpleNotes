@@ -1,5 +1,6 @@
-package com.example.simplenotes
+package com.example.simplenotes.dao
 
+import com.example.simplenotes.Note
 import kotlinx.coroutines.flow.Flow
 
 class NoteRepository(private val noteDao: NoteDao) {
