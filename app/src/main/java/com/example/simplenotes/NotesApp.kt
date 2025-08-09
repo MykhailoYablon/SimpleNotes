@@ -22,13 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.simplenotes.notes.AddNoteDialog
+import com.example.simplenotes.notes.NoteDetailScreen
+import com.example.simplenotes.notes.NoteItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesApp(viewModel: NotesViewModel) {
     val notes by viewModel.notes.collectAsState(initial = emptyList())
     val showAddDialog by viewModel.showAddDialog.collectAsState()
-    val showDetailDialog by viewModel.showDetailDialog.collectAsState()
+    val showDetailScreen by viewModel.showDetailScreen.collectAsState()
     val selectedNote by viewModel.selectedNote.collectAsState()
 
     Scaffold(
@@ -82,17 +85,17 @@ fun NotesApp(viewModel: NotesViewModel) {
         )
     }
 
-    if (showDetailDialog && selectedNote != null) {
-        NoteDetailDialog(
+    if (showDetailScreen && selectedNote != null) {
+        NoteDetailScreen(
             note = selectedNote!!,
-            onDismiss = { viewModel.hideDetailDialog() },
+            onNavigateBack = { viewModel.hideDetailScreen() },
             onDelete = { note ->
                 viewModel.deleteNote(note)
-                viewModel.hideDetailDialog()
+                viewModel.hideDetailScreen()
             },
             onUpdate = { note ->
                 viewModel.updateNote(note)
-                viewModel.hideDetailDialog()
+                viewModel.hideDetailScreen()
             }
         )
     }

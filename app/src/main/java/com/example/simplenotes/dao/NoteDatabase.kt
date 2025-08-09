@@ -1,4 +1,4 @@
-package com.example.simplenotes
+package com.example.simplenotes.dao
 
 import android.content.Context
 import androidx.room.Database
@@ -7,7 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.simplenotes.color.Converters
+import com.example.simplenotes.Note
+import com.example.simplenotes.highlight.Converters
 
 @Database(
     entities = [Note::class],

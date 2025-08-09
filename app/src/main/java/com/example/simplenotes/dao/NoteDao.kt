@@ -1,6 +1,7 @@
-package com.example.simplenotes
+package com.example.simplenotes.dao
 
 import androidx.room.*
+import com.example.simplenotes.Note
 import kotlinx.coroutines.flow.Flow
 
 @Dao

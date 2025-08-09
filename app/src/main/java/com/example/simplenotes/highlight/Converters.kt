@@ -1,6 +1,7 @@
-package com.example.simplenotes.color
+package com.example.simplenotes.highlight
 
 // TypeConverters.kt
+import androidx.compose.ui.graphics.Color
 import androidx.room.TypeConverter
 
 class Converters {
@@ -34,12 +35,12 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromColor(color: androidx.compose.ui.graphics.Color?): Long? {
+    fun fromColor(color: Color?): Long? {
         return color?.value?.toLong()
     }
 
     @TypeConverter
-    fun toColor(colorValue: Long?): androidx.compose.ui.graphics.Color? {
-        return if (colorValue == null) null else androidx.compose.ui.graphics.Color(colorValue.toULong())
+    fun toColor(colorValue: Long?): Color? {
+        return if (colorValue == null) null else Color(colorValue.toULong())
     }
 }
