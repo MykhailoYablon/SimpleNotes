@@ -10,7 +10,7 @@ class Converters {
         if (value == null) return null
 
         return value.joinToString(separator = "|") { highlight ->
-            "${highlight.start},${highlight.end},${highlight.color.name}"
+            "${highlight.start},${highlight.end},${highlight.color.value}"
         }
     }
 
@@ -25,7 +25,7 @@ class Converters {
                     HighlightRange(
                         start = parts[0].toInt(),
                         end = parts[1].toInt(),
-                        color = HighlightColor.valueOf(parts[2])
+                        color = Color(parts[2].removePrefix("#").toLong(16) or 0xFF000000)
                     )
                 } catch (e: Exception) {
                     null // Skip invalid entries

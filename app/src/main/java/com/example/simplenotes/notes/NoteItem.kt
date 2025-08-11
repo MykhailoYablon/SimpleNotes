@@ -83,7 +83,7 @@ fun NoteItem(
                             if (start < end) {
                                 addStyle(
                                     style = SpanStyle(
-                                        background = highlight.color.color.copy(alpha = 0.3f)
+                                        background = highlight.color.copy(alpha = 0.3f)
                                     ),
                                     start = start,
                                     end = end
