@@ -58,6 +58,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.simplenotes.color.RGBColorPicker
+import com.kavi.droid.color.picker.ui.pickers.GridColorPicker
 
 @Composable
 fun HighlightableTextField(
@@ -166,62 +168,12 @@ fun HighlightableTextField(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Color options in a grid
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(HighlightColor.entries) { color ->
-                            Card(
-                                modifier = Modifier
-                                    .width(80.dp)
-                                    .clickable {
-                                        val selection = textFieldValue.selection
-                                        val start = minOf(selection.start, selection.end)
-                                        val end = maxOf(selection.start, selection.end)
-
-                                        val newRanges = highlights.toMutableList()
-                                        newRanges.add(
-                                            HighlightRange(
-                                                start = start,
-                                                end = end,
-                                                color = color
-                                            )
-                                        )
-                                        onHighlightsChange(newRanges.sortedBy { it.start })
-                                        showColorMenu = false
-
-                                        // Clear selection after adding highlight
-                                        textFieldValue = textFieldValue.copy(
-                                            selection = TextRange(textFieldValue.selection.end)
-                                        )
-                                    },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = color.color.copy(alpha = 0.2f)
-                                ),
-                                border = BorderStroke(1.dp, color.color)
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .background(
-                                                color.color,
-                                                CircleShape
-                                            )
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = color.displayName,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
+                    GridColorPicker(
+                        modifier = Modifier.padding(16.dp),
+                        onColorSelected = { selectedColor ->
+                            // Do what ever you want with selectedColor
                         }
-                    }
+                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -281,7 +233,7 @@ fun HighlightableTextField(
                                     modifier = Modifier
                                         .size(12.dp)
                                         .background(
-                                            highlight.color.color,
+                                            highlight.color,
                                             CircleShape
                                         )
                                 )
@@ -294,7 +246,7 @@ fun HighlightableTextField(
                                 )
                             },
                             colors = AssistChipDefaults.assistChipColors(
-                                containerColor = highlight.color.color.copy(alpha = 0.1f)
+                                containerColor = highlight.color.copy(alpha = 0.1f)
                             ),
                             modifier = Modifier.height(32.dp)
                         )

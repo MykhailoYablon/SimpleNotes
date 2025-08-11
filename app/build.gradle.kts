@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.simplenotes"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -55,4 +55,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.material)
+
+    implementation(libs.kvcolorpicker.android)
 }
