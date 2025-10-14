@@ -75,21 +75,7 @@ fun NoteItem(
                 Text(
                     text = buildAnnotatedString {
                         var message = note.message
-                        var messageHighlights = note.messageHighlights ?: emptyList()
                         append(message)
-                        messageHighlights.forEach { highlight ->
-                            val start = highlight.start.coerceAtMost(message.length)
-                            val end = highlight.end.coerceAtMost(message.length)
-                            if (start < end) {
-                                addStyle(
-                                    style = SpanStyle(
-                                        background = highlight.color.copy(alpha = 0.3f)
-                                    ),
-                                    start = start,
-                                    end = end
-                                )
-                            }
-                        }
                     },
                     fontSize = 14.sp,
                     color = Color(0xFF757575),

@@ -78,8 +78,8 @@ fun NotesApp(viewModel: NotesViewModel) {
     if (showAddDialog) {
         AddNoteDialog(
             onDismiss = { viewModel.hideAddDialog() },
-            onSave = { title, message, color, highlights ->
-                viewModel.addNote(title, message, color, highlights)
+            onSave = { title, message, color ->
+                viewModel.addNote(title, message, color)
                 viewModel.hideAddDialog()
             }
         )

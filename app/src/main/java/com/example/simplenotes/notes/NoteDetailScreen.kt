@@ -2,6 +2,7 @@ package com.example.simplenotes.notes
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,7 +24,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,20 +46,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simplenotes.Note
-import com.example.simplenotes.highlight.HighlightableTextField
+import com.example.simplenotes.color.ColorSelector
+import com.example.simplenotes.highlight.NoteTextField
 import com.example.simplenotes.color.NoteColors
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-// NoteDetailScreen.kt - Replace your AlertDialog with this full screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteDetailScreen(
@@ -70,10 +68,7 @@ fun NoteDetailScreen(
     var currentTitle by remember(note.title) { mutableStateOf(note.title) }
     var currentMessage by remember(note.message) { mutableStateOf(note.message) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
-    var currentMessageHighlights by remember(note) {
-        mutableStateOf(note.messageHighlights ?: emptyList())
-    }
+    var selectedColor by remember { mutableStateOf(note.color) }
 
     Scaffold(
         topBar = {
@@ -100,7 +95,7 @@ fun NoteDetailScreen(
                                     val updatedNote = note.copy(
                                         title = currentTitle,
                                         message = currentMessage,
-                                        messageHighlights = currentMessageHighlights
+                                        color = selectedColor
                                     )
                                     onUpdate(updatedNote)
                                     isEditing = false
@@ -117,7 +112,6 @@ fun NoteDetailScreen(
                                 // Reset to original values
                                 currentTitle = note.title
                                 currentMessage = note.message
-                                currentMessageHighlights = note.messageHighlights ?: emptyList()
                             }
                         ) {
                             Icon(Icons.Default.Close, contentDescription = "Cancel",
@@ -163,16 +157,38 @@ fun NoteDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                HighlightableTextField(
+                OutlinedTextField(
                     value = currentMessage,
-                    onValueChange = { currentMessage = it },
-                    highlights = currentMessageHighlights,
-                    onHighlightsChange = { currentMessageHighlights = it },
-                    label = { Text("Message (${currentMessage.length} characters)") },
+                    onValueChange = { currentMessage = it},
                     modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Message (${currentMessage.length} characters)") },
                     minLines = 10,
-                    maxLines = Int.MAX_VALUE
+                    maxLines = Int.MAX_VALUE,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        selectionColors = TextSelectionColors(
+                            handleColor = MaterialTheme.colorScheme.primary,
+                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        )
+                    )
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Color:", fontWeight = FontWeight.Bold)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NoteColors.colorList.forEach { color ->
+                        ColorSelector(
+                            color = color,
+                            isSelected = selectedColor == color,
+                            onSelect = { selectedColor = color }
+                        )
+                    }
+                }
             } else {
                 // View mode
 
@@ -214,21 +230,7 @@ fun NoteDetailScreen(
                             Text(
                                 text = buildAnnotatedString {
                                     var message = note.message
-                                    var messageHighlights = note.messageHighlights ?: emptyList()
                                     append(message)
-                                    messageHighlights.forEach { highlight ->
-                                        val start = highlight.start.coerceAtMost(message.length)
-                                        val end = highlight.end.coerceAtMost(message.length)
-                                        if (start < end) {
-                                            addStyle(
-                                                style = SpanStyle(
-                                                    background = highlight.color.copy(alpha = 0.3f)
-                                                ),
-                                                start = start,
-                                                end = end
-                                            )
-                                        }
-                                    }
                                 },
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.fillMaxWidth()
@@ -270,25 +272,6 @@ fun NoteDetailScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        }
-
-                        if (currentMessageHighlights.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Row {
-                                Icon(
-                                    Icons.Default.Star,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "${currentMessageHighlights.size} highlights",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
                         }
                     }
                 }
