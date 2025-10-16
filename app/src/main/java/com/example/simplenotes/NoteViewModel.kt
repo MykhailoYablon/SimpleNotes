@@ -40,14 +40,13 @@ class NotesViewModel(private val repository: NoteRepository) : ViewModel() {
         _selectedNote.value = null
     }
 
-    fun addNote(title: String, message: String, color: String, highlights: List<HighlightRange>) {
+    fun addNote(title: String, message: String, color: String) {
         viewModelScope.launch {
             repository.insertNote(
                 Note(
                     title = title,
                     message = message,
-                    color = color,
-                    messageHighlights = highlights
+                    color = color
                 )
             )
         }

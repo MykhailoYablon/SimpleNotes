@@ -1,6 +1,8 @@
 package com.example.simplenotes
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -18,7 +21,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,7 +41,10 @@ fun NotesApp(viewModel: NotesViewModel) {
     val showDetailScreen by viewModel.showDetailScreen.collectAsState()
     val selectedNote by viewModel.selectedNote.collectAsState()
 
+    var straightNoteId by rememberSaveable { mutableStateOf<Int?>(null) }
+
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = {
@@ -45,8 +55,8 @@ fun NotesApp(viewModel: NotesViewModel) {
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color(0xFF553AB7)
                 )
             )
         },
@@ -59,18 +69,31 @@ fun NotesApp(viewModel: NotesViewModel) {
             }
         }
     ) { paddingValues ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .background(brush = getSharedGradient())
         ) {
-            items(notes) { note ->
-                NoteItem(
-                    note = note,
-                    onClick = { viewModel.showDetailDialog(note) }
-                )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(notes) { note ->
+                    NoteItem(
+                        note = note,
+                        isStraight = straightNoteId == note.id,
+                        onClick = {
+                            if (straightNoteId != note.id) {
+                                straightNoteId = note.id
+                            } else {
+                                viewModel.showDetailDialog(note)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
@@ -78,8 +101,8 @@ fun NotesApp(viewModel: NotesViewModel) {
     if (showAddDialog) {
         AddNoteDialog(
             onDismiss = { viewModel.hideAddDialog() },
-            onSave = { title, message, color, highlights ->
-                viewModel.addNote(title, message, color, highlights)
+            onSave = { title, message, color ->
+                viewModel.addNote(title, message, color)
                 viewModel.hideAddDialog()
             }
         )
@@ -99,4 +122,16 @@ fun NotesApp(viewModel: NotesViewModel) {
             }
         )
     }
+}
+
+
+@Composable
+fun getSharedGradient(): Brush {
+    return Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFF282272), // Blue
+            Color(0xFF553AB7), // Purple
+            Color(0x4D6C43FF)
+        )
+    )
 }

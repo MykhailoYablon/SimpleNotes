@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,20 +22,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.simplenotes.color.ColorSelector
-import com.example.simplenotes.highlight.HighlightRange
-import com.example.simplenotes.highlight.HighlightableTextField
 import com.example.simplenotes.color.NoteColors
+import com.example.simplenotes.highlight.NoteTextField
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNoteDialog(
     onDismiss: () -> Unit,
-    onSave: (String, String, String, List<HighlightRange>) -> Unit
+    onSave: (String, String, String) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("Green") }
-    var messageHighlights by remember { mutableStateOf<List<HighlightRange>>(emptyList()) }
 
 
     AlertDialog(
@@ -50,23 +49,45 @@ fun AddNoteDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                HighlightableTextField(
+                OutlinedTextField(
                     value = message,
-                    onValueChange = { message = it },
-                    highlights = messageHighlights,
-                    onHighlightsChange = { messageHighlights = it },
-                    label = { Text("Message (${message.length} characters)") },
+                    onValueChange = { message = it
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    maxLines = 5
+                    maxLines = 5,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        selectionColors = TextSelectionColors(
+                            handleColor = MaterialTheme.colorScheme.primary,
+                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        )
+                    )
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Color:", fontWeight = FontWeight.Bold)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    NoteColors.colorList.forEach { color ->
+                        ColorSelector(
+                            color = color,
+                            isSelected = selectedColor == color,
+                            onSelect = { selectedColor = color }
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
                     if (title.isNotBlank()) {
-                        onSave(title, message, selectedColor, messageHighlights)
+                        onSave(title, message, selectedColor)
                     }
                 },
                 enabled = title.isNotBlank()

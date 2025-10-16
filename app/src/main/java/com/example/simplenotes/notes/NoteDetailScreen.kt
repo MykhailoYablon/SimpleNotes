@@ -1,7 +1,9 @@
 package com.example.simplenotes.notes
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -22,7 +25,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,20 +47,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simplenotes.Note
-import com.example.simplenotes.highlight.HighlightableTextField
+import com.example.simplenotes.color.ColorSelector
 import com.example.simplenotes.color.NoteColors
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.simplenotes.getSharedGradient
 
-// NoteDetailScreen.kt - Replace your AlertDialog with this full screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteDetailScreen(
@@ -70,10 +70,7 @@ fun NoteDetailScreen(
     var currentTitle by remember(note.title) { mutableStateOf(note.title) }
     var currentMessage by remember(note.message) { mutableStateOf(note.message) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
-    var currentMessageHighlights by remember(note) {
-        mutableStateOf(note.messageHighlights ?: emptyList())
-    }
+    var selectedColor by remember { mutableStateOf(note.color) }
 
     Scaffold(
         topBar = {
@@ -87,8 +84,10 @@ fun NoteDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
                 actions = {
@@ -100,15 +99,17 @@ fun NoteDetailScreen(
                                     val updatedNote = note.copy(
                                         title = currentTitle,
                                         message = currentMessage,
-                                        messageHighlights = currentMessageHighlights
+                                        color = selectedColor
                                     )
                                     onUpdate(updatedNote)
                                     isEditing = false
                                 }
                             }
                         ) {
-                            Icon(Icons.Default.Check, contentDescription = "Save",
-                                tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(
+                                Icons.Default.Check, contentDescription = "Save",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                         // Cancel button
                         IconButton(
@@ -117,11 +118,12 @@ fun NoteDetailScreen(
                                 // Reset to original values
                                 currentTitle = note.title
                                 currentMessage = note.message
-                                currentMessageHighlights = note.messageHighlights ?: emptyList()
                             }
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel",
-                                tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(
+                                Icons.Default.Close, contentDescription = "Cancel",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     } else {
                         // Edit button
@@ -133,160 +135,170 @@ fun NoteDetailScreen(
                         }
                         // Delete button
                         IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete",
-                                tint = MaterialTheme.colorScheme.onPrimary)
+                            Icon(
+                                Icons.Default.Delete, contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent,
+                    titleContentColor = Color(0xFF553AB7)
                 )
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .background(brush = getSharedGradient())
         ) {
-            if (isEditing) {
-                // Edit mode
-                OutlinedTextField(
-                    value = currentTitle,
-                    onValueChange = { currentTitle = it },
-                    label = { Text("Title*") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                HighlightableTextField(
-                    value = currentMessage,
-                    onValueChange = { currentMessage = it },
-                    highlights = currentMessageHighlights,
-                    onHighlightsChange = { currentMessageHighlights = it },
-                    label = { Text("Message (${currentMessage.length} characters)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 10,
-                    maxLines = Int.MAX_VALUE
-                )
-            } else {
-                // View mode
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = NoteColors.backgroundColorMap[note.color]
-                            ?: NoteColors.Green
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (isEditing) {
+                    // Edit mode
+                    OutlinedTextField(
+                        value = currentTitle,
+                        onValueChange = { currentTitle = it },
+                        label = { Text("Title*") },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                ) {
 
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = currentMessage,
+                        onValueChange = { currentMessage = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Message (${currentMessage.length} characters)") },
+                        minLines = 10,
+                        maxLines = Int.MAX_VALUE,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            selectionColors = TextSelectionColors(
+                                handleColor = MaterialTheme.colorScheme.primary,
+                                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            )
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("Color:", fontWeight = FontWeight.Bold, color = Color(0xFFECECEC))
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-
+                        NoteColors.colorList.forEach { color ->
+                            ColorSelector(
+                                color = color,
+                                isSelected = selectedColor == color,
+                                onSelect = { selectedColor = color }
+                            )
+                        }
+                    }
+                } else {
+                    // View mode - dark sleek style
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF262626)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        border = CardDefaults.outlinedCardBorder(),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.Top
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(16.dp)
-                                    .background(
-                                        color = NoteColors.colorMap[note.color] ?: NoteColors.Green,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
+                                    .width(4.dp)
+                                    .height(48.dp)
+                                    .background(color = NoteColors.colorMap[note.color] ?: NoteColors.Green)
                             )
 
                             Spacer(modifier = Modifier.width(12.dp))
 
-                            Text(
-                                text = note.title,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        if (currentMessage.isNotEmpty()) {
-                            Text(
-                                text = buildAnnotatedString {
-                                    var message = note.message
-                                    var messageHighlights = note.messageHighlights ?: emptyList()
-                                    append(message)
-                                    messageHighlights.forEach { highlight ->
-                                        val start = highlight.start.coerceAtMost(message.length)
-                                        val end = highlight.end.coerceAtMost(message.length)
-                                        if (start < end) {
-                                            addStyle(
-                                                style = SpanStyle(
-                                                    background = highlight.color.copy(alpha = 0.3f)
-                                                ),
-                                                start = start,
-                                                end = end
-                                            )
-                                        }
-                                    }
-                                },
-                                style = MaterialTheme.typography.bodyLarge,
+                            Column(
                                 modifier = Modifier.fillMaxWidth()
-                            )
+                            ) {
+                                Text(
+                                    text = note.title,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFECECEC),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                if (currentMessage.isNotEmpty()) {
+                                    Text(
+                                        text = buildAnnotatedString {
+                                            var message = note.message
+                                            append(message)
+                                        },
+                                        color = Color(0xFFB0B0B0),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(
+                                    text = java.text.SimpleDateFormat("dd MMM yyyy").format(java.util.Date(note.createdAt)),
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF8A8A8A)
+                                )
+                            }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                // Note metadata
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Note Information",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                    // Note metadata
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF2F2F2F)
                         )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row {
-                            Icon(
-                                Icons.Default.Create,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
                             Text(
-                                text = "${currentMessage.length} characters",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "Note Information",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFECECEC)
                             )
-                        }
 
-                        if (currentMessageHighlights.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             Row {
                                 Icon(
-                                    Icons.Default.Star,
+                                    Icons.Default.Create,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = Color(0xFFB0B0B0)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "${currentMessageHighlights.size} highlights",
+                                    text = "${currentMessage.length} characters",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = Color(0xFFB0B0B0)
                                 )
                             }
                         }
