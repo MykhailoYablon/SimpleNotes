@@ -53,8 +53,5 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
     implementation(libs.material)
-
-    implementation(libs.kvcolorpicker.android)
 }
